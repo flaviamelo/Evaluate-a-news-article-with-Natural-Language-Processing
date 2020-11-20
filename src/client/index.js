@@ -1,14 +1,8 @@
-import { checkURL } from './js/urlChecker';
 import { handleSubmit } from './js/formHandler';
+import { updateUI } from './js/uiHandler';
+import { validateInput } from './js/validate';
+import './css/style.scss';
 
-import './styles/resets.scss';
-import './styles/base.scss';
-import './styles/footer.scss';
-import './styles/form.scss';
-import './styles/header.scss';
-import './styles/midsection.scss';
-import './styles/messages.scss';
-
-import './images/meaningCloud-logo.png';
-
-export { checkURL, handleSubmit };
+export { handleSubmit };
+export { updateUI };
+export { validateInput };

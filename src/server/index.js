@@ -1,60 +1,82 @@
-const dotenv = require('dotenv');
-dotenv.config();
-const API_KEY = process.env.API_KEY;
-
+const path = require('path');
 const express = require('express');
-const mockAPIResponse = require('./mockAPI.js');
+const axios = require('axios');
+const dotenv = require('dotenv');
 const cors = require('cors');
-const fetch = require('node-fetch');
 const bodyParser = require('body-parser');
 
+// create the Express app
 const app = express();
 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// Enable All CORS Requests
 app.use(cors());
+
+// Will use the dist folder as root
 app.use(express.static('dist'));
 
-/* Middleware*/
-//Here we are configuring express to use body-parser as middle-ware.
-app.use(bodyParser.text());
+dotenv.config();
 
-const URL_ROOT = 'https://api.meaningcloud.com/sentiment-2.1';
-const URL_KEY = `?key=${API_KEY}`;
-const URL_LANG = '&lang=auto';
-const URL_USER_INPUT = '&url=';
-const port = 8081;
+let sentiment;
 
-// Designates what port the app will listen to for incoming requests
-app.listen(port, function () {
-	console.log(`Evaluate news app listening on port ${port}!`);
-});
-
-// Serves the main page to browser
 app.get('/', function (req, res) {
 	res.sendFile('dist/index.html');
 });
 
-// Tests the path between client and server, returns mock API response
-app.get('/test', function (req, res) {
-	res.send(mockAPIResponse);
+// runs the function when post title is called from client
+app.post('/title', async (req, res) => {
+	try {
+		// calls the api by passing API key, type i.e URL or word and the text which is url or word
+		const result = await axios.post(
+			`http://api.meaningcloud.com/sentiment-2.1?key=${process.env.API_KEY}&lang=en&${req.body.type}=${req.body.title}`
+		);
+
+		// stores the result of the call in data
+		const { data } = result;
+		const { code } = data.status;
+
+		// status code 200 is failed so runs following if not failed
+		if (code !== '200') {
+			// stores the below field in its own variable
+			const { score_tag } = data;
+			const { agreement } = data;
+			const { subjectivity } = data;
+			const { confidence } = data;
+			const { irony } = data;
+
+			// storing the api response
+			sentiment = {
+				score_tag,
+				agreement,
+				subjectivity,
+				confidence,
+				irony,
+			};
+		} else {
+			// if error occurs then change the response to false
+			sentiment = false;
+		}
+		res.end('It worked!');
+	} catch (e) {
+		console.log(`Error = ${e}`);
+	}
 });
 
-app.post('/call', callAPI);
+// calls the function on get sentiment method
+app.get('/sentiment', (req, res) => {
+	// sends the sentiment variable
+	res.send(sentiment);
+});
 
-async function callAPI(req, res) {
-	console.log(`Request is ${req.body}`);
-	const url = URL_ROOT + URL_KEY + URL_LANG + URL_USER_INPUT + req.body;
-	console.log(url);
-	const response = await fetch(url);
+// setting up the port in 3000 if no .env.port present in .env file
+const port = process.env.port || 3000;
 
-	try {
-		const nlpData = await response.json();
-		if (nlpData.status.code == 0) {
-			nlpData.message = 'Good data received from API';
-			res.send(nlpData);
-		} else {
-			res.send({ message: "API call didn't work" });
-		}
-	} catch (error) {
-		console.error(error);
-	}
-}
+// designates what port the app will listen to for incoming requests
+app.listen(port, function () {
+	console.log('Example app listening on port ' + port);
+});

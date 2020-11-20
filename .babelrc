@@ -1,12 +1,11 @@
 {
-    "presets": [
-        [
-            "@babel/preset-env",
-            {
-                "exclude": [
-                    "transform-regenerator"
-                ]
-            }
-        ]
-    ]
+  "presets": ["@babel/preset-env"],
+  "plugins": [
+      [
+          "@babel/plugin-transform-runtime",
+          {
+              "regenerator": true
+          }
+      ]
+  ]
 }
