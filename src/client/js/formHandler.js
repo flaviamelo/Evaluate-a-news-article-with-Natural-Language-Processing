@@ -1,41 +1,51 @@
-export async function handleSubmit(e) {
-	e.preventDefault();
+const { checkForUrl } = require('./urlChecker');
 
-	// getting the values of the input
-	const formText = document.querySelector('#word').value;
-	const urlRadio = document.querySelector('#radio-url').checked;
-	let text;
-	let validation;
+function handleSubmit(event) {
+	event.preventDefault();
 
-	// checks if url is selected on radio and runs the validateInput function
-	if (urlRadio) {
-		text = {
-			title: formText,
-			type: 'url',
-		};
-		validation = Client.validateInput(formText, 'url');
+	let formText = document.getElementById('url').value;
+	console.log('::: Form Submitted :::');
+
+	if (checkForUrl(formText)) {
+		console.log('valid url');
+
+		fetch('http://localhost:8080/article', {
+			method: 'POST',
+			cache: 'no-cache',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'text/plain',
+			},
+			body: formText,
+		})
+			.then((res) => res.json())
+			.then((res) => {
+				console.log('res ui', res);
+
+				document.querySelector('#score').innerHTML = `Polarity score: ${score(res.score_tag)}`;
+				document.querySelector('#subjectivity').innerHTML = `Subjectivity: ${letterCase(res.subjectivity)}`;
+				document.querySelector('#confidence').innerHTML = `Confidence: ${letterCase(res.confidence)}`;
+				document.querySelector('#irony').innerHTML = `Irony: ${letterCase(res.irony)}`;
+			});
 	} else {
-		text = {
-			title: formText,
-			type: 'txt',
-		};
-		validation = Client.validateInput(formText, 'word');
+		console.log('invalid url');
 	}
-
-	// fetching the post title from our server and passing the text object
-	await fetch('http://localhost:8081/title', {
-		method: 'POST',
-		mode: 'cors',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(text),
-	});
-
-	// fetches the sentiment data from our server
-	const sentiment = await fetch('http://localhost:8081/sentiment');
-	const sentimentJson = await sentiment.json();
-
-	// updates the UI according to the data
-	Client.updateUI(sentimentJson, validation);
 }
+
+const letterCase = (word) => {
+	return word.charAt(0) + word.slice(1).toLowerCase();
+};
+
+const score = (score_tag) => {
+	if (score_tag === 'P+' || score_tag === 'P') {
+		return 'Positive';
+	} else if (score_tag === 'N+' || score_tag === 'N') {
+		return 'Negative';
+	} else if (score_tag === 'NEU') {
+		return 'Neutral';
+	} else {
+		return 'Non Sentimental';
+	}
+};
+
+export { handleSubmit, score };
