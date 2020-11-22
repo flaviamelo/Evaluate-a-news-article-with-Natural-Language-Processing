@@ -1,14 +1,14 @@
 header {
-	width: 100%;
-	box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
-	background: #fff;
-	height: 50px;
-	padding: 0.5rem;
+	background-color: #5b803d;
+	color: #ede7e3;
+	height: 90px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 h1 {
-	font-weight: 500;
-	color: #6f706f;
-	font-size: 1.5rem;
+	font-size: 26px;
+	font-weight: bold;
 	text-align: center;
 }

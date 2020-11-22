@@ -1,0 +1,10 @@
+<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous"><title>Project04</title><link href="main.css" rel="stylesheet"></head><body><header><h1>Evaluate News Article with Natural Language Processing</h1></header><main><div class="grid-container"><section class="item1"><form onsubmit="return Client.handleSubmit(event)"><textarea id="analyse-text" name="analyse-text" placeholder="Enter news article extract to be analysed here:" rows="4" cols="50" required maxlength="500" onkeyup="return Client.charCountUpdate()" onblur="return Client.inputValidation()"></textarea> <span id="char-count">Characters Count: 0/500</span><br><input type="submit" value="Submit" onsubmit="return Client.handleSubmit(event)"></form></section><section class="item2"><strong>Form Results:</strong><div id="polarity"></div><div id="confidence"></div><div id="subjectivity"></div><div id="agreement"></div><div id="irony"></div></section></div></main><footer><p>&copy Made by Flavia Barreto</p></footer><script>// Check that service workers are supported
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                        console.log('SW registered: ', registration);
+                    }).catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+                });
+            }</script><script src="main.js"></script></body></html>

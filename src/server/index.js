@@ -1,44 +1,46 @@
 const dotenv = require('dotenv');
 dotenv.config();
-const API_KEY = process.env.API_KEY;
-
-
-const path = require('path');
-const mockAPIResponse = require('./mockAPI');
-const fetch = require('node-fetch');
-
-const baseUrl = 'https://api.meaningcloud.com/sentiment-2.1?key=';
 
 const express = require('express');
+
 const app = express();
 
+const fetch = require('node-fetch');
+
 const bodyParser = require('body-parser');
-app.use(bodyParser.text());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 const cors = require('cors');
 app.use(cors());
 
+// Initialise the main project folder, connecting server-side with client side
 app.use(express.static('dist'));
 
-app.get('/', (req, res) => {
+// Home route pointing to index.html in dist folder for the client
+app.get('/', function (req, res) {
 	res.sendFile('dist/index.html');
 });
 
-app.get('/test', (req, res) => {
-	res.send(mockAPIResponse);
+// Designates what port the app will listen to for incoming requests
+// You can’t run two apps on the same port at the same time. If webpack is running on port 8080, use another port e.g. 8081
+app.listen(8081, function () {
+	console.log('Example app listening on port 8081!');
 });
 
-app.post('/article', async (req, res) => {
-	const resp = await fetch(`${baseUrl}${API_KEY}&lang=auto&url=${req.body}`);
+app.post('/analyse', async function (req, res) {
+	const app_key = process.env.API_KEY;
+	const apiUrl = `https://api.meaningcloud.com/sentiment-2.1?key=${app_key}&of=json&txt=${req.body.text}&model=general&lang=en`;
+	let response = await fetch(apiUrl);
+	let data = await response.json();
 
-	try {
-		const data = await resp.json();
-		res.send(data);
-	} catch (err) {
-		console.log('error', err);
-	}
-});
-
-app.listen(8080, () => {
-	console.log(`app running at http://localhost:8080`);
+	const evaluation = {};
+	evaluation.polarity = data.score_tag;
+	evaluation.confidence = data.confidence;
+	evaluation.subjectivity = data.subjectivity;
+	evaluation.agreement = data.agreement;
+	evaluation.irony = data.irony;
+	res.send(evaluation);
+	console.log(req.body);
+	console.log(evaluation);
 });

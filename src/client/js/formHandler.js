@@ -1,51 +1,33 @@
-const { checkForUrl } = require('./urlChecker');
-
 function handleSubmit(event) {
 	event.preventDefault();
-
-	let formText = document.getElementById('url').value;
+	// check what text was put into the form field
+	let formText = document.getElementById('analyse-text').value;
 	console.log('::: Form Submitted :::');
 
-	if (checkForUrl(formText)) {
-		console.log('valid url');
+	fetch('http://localhost:8081/analyse', {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ text: formText }),
+	})
+		.then((res) => res.json())
+		.then(function (res) {
+			//you can create div for polarity, confidence, subjectivity, irony, agreement. Access them using getElementById and render the response in innerHTML. The log below render all the response.
+			console.log(res);
+			let polarity = document.getElementById('polarity');
+			let confidence = document.getElementById('confidence');
+			let subjectivity = document.getElementById('subjectivity');
+			let agreement = document.getElementById('agreement');
+			let irony = document.getElementById('irony');
 
-		fetch('http://localhost:8080/article', {
-			method: 'POST',
-			cache: 'no-cache',
-			credentials: 'same-origin',
-			headers: {
-				'Content-Type': 'text/plain',
-			},
-			body: formText,
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				console.log('res ui', res);
-
-				document.querySelector('#score').innerHTML = `Polarity score: ${score(res.score_tag)}`;
-				document.querySelector('#subjectivity').innerHTML = `Subjectivity: ${letterCase(res.subjectivity)}`;
-				document.querySelector('#confidence').innerHTML = `Confidence: ${letterCase(res.confidence)}`;
-				document.querySelector('#irony').innerHTML = `Irony: ${letterCase(res.irony)}`;
-			});
-	} else {
-		console.log('invalid url');
-	}
+			polarity.innerHTML = res.polarity;
+			confidence.innerHTML = res.confidence;
+			subjectivity.innerHTML = res.subjectivity;
+			agreement.innerHTML = res.agreement;
+			irony.innerHTML = res.irony;
+		});
 }
 
-const letterCase = (word) => {
-	return word.charAt(0) + word.slice(1).toLowerCase();
-};
-
-const score = (score_tag) => {
-	if (score_tag === 'P+' || score_tag === 'P') {
-		return 'Positive';
-	} else if (score_tag === 'N+' || score_tag === 'N') {
-		return 'Negative';
-	} else if (score_tag === 'NEU') {
-		return 'Neutral';
-	} else {
-		return 'Non Sentimental';
-	}
-};
-
-export { handleSubmit, score };
+export { handleSubmit };
