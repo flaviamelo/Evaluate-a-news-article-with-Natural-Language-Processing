@@ -14,7 +14,7 @@ function handleSubmit(event) {
 	})
 		.then((res) => res.json())
 		.then(function (res) {
-			//you can create div for polarity, confidence, subjectivity, irony, agreement. Access them using getElementById and render the response in innerHTML. The log below render all the response.
+			
 			console.log(res);
 			let polarity = document.getElementById('polarity');
 			let confidence = document.getElementById('confidence');
